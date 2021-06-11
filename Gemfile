@@ -13,6 +13,10 @@ gem 'puma', '~> 5.0'
 # Auth
 gem 'devise_token_auth', '~> 1.1.4'
 
+# Email
+gem 'autoprefixer-rails'
+gem 'foundation-rails'
+
 group :development, :test do
   gem 'byebug', platforms: %i[mri mingw x64_mingw]
 end
