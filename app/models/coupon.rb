@@ -4,4 +4,6 @@ class Coupon < ApplicationRecord
   enum status: {active: 1, inactive: 2}
   validates :code, uniqueness: {case_sensitive: false}
   validates :due_date, future_date: true
+
+  include Paginatable
 end
