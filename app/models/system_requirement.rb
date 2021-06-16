@@ -6,7 +6,7 @@ class SystemRequirement < ApplicationRecord
   validates :storage, presence: true
   validates :video_board, presence: true
 
-  has_many :games, dependent: :restrict_with_error
+  has_many :games, dependent: :destroy
 
   include NameSearchable
   include Paginatable
