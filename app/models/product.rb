@@ -5,4 +5,6 @@ class Product < ApplicationRecord
   validates :description, presence: true
   has_many :product_categories, dependent: :destroy
   has_many :categories, through: :product_categories
+  has_one_attached :image
+  validates :image, presence: true
 end
