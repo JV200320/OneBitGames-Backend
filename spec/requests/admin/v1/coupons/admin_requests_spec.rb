@@ -35,7 +35,6 @@ RSpec.describe "Admin::V1::Coupons as :admin", type: :request do
       
       it "doesn't return specific coupon" do
         get url, headers: auth_header(login_user), params: coupon_invalid_params
-        p body_json
         expect(body_json['coupon']).to be_nil
       end
       
@@ -61,7 +60,6 @@ RSpec.describe "Admin::V1::Coupons as :admin", type: :request do
       it "adds new Coupon" do
         expect do
           post url, headers: auth_header(login_user), params: coupon_params
-          p body_json
         end.to change(Coupon, :count).by(1)
       end
 
@@ -78,7 +76,6 @@ RSpec.describe "Admin::V1::Coupons as :admin", type: :request do
         it "doesn't add a new Coupon" do
         expect do
           post url, headers: auth_header(login_user), params: coupon_invalid_params
-          p body_json
         end.to_not change(Coupon, :count)
       end
       it 'returns error messages' do
@@ -93,19 +90,74 @@ RSpec.describe "Admin::V1::Coupons as :admin", type: :request do
     end
   end
 
-  # context "PATCH /coupons" do
+  context "PATCH /coupons" do
+    let(:coupon) {create(:coupon)}
+    let(:url) { "/admin/v1/coupons/#{coupon.id}" }
     
-  #   it "updates coupon due_date" do
+    context "with valid params" do
+      let(:new_due_date) { Time.zone.now + 2.day}
+      let(:coupon_params) { {coupon: {due_date: new_due_date}}.to_json}
       
-  #   end
+      it "updates coupon due_date" do
+        patch url, headers: auth_header(login_user), params: coupon_params
+        coupon.reload
+        expect(coupon.due_date.to_s). to eq(new_due_date.to_s)
+      end
 
-  #   it "updates coupon status" do
+      it 'returns updated Coupon' do
+        patch url, headers: auth_header(login_user), params: coupon_params
+        coupon.reload
+        expect_coupon = coupon.as_json(only: %i[code status due_date discount_value])
+        expect(body_json['coupon']).to eq(expect_coupon)
+      end
+
+      it "returns success status" do
+        patch url, headers: auth_header(login_user), params: coupon_params
+        expect(response).to have_http_status(:ok)
+      end
+
+    end
+
+    context "with invalid params" do
+      let(:old_due_date) { coupon.due_date}
+      let(:coupon_invalid_params) { {coupon: attributes_for(:coupon, due_date: nil)}.to_json}
       
-  #   end
+      it "doesn't update coupon due_date" do
+        patch url, headers: auth_header(login_user), params: coupon_invalid_params
+        expect(coupon.due_date). to eq(old_due_date)
+      end
 
-  #   it "updates coupon discount_value" do
-      
-  #   end
+      it 'returns error messages' do
+        patch url, headers: auth_header(login_user), params: coupon_invalid_params
+        expect(body_json['errors']['fields']).to have_key('due_date')
+      end
 
-  # end
+      it 'returns unprocessable_entity status' do
+        patch url, headers: auth_header(login_user), params: coupon_invalid_params
+        expect(response).to have_http_status(:unprocessable_entity)
+      end
+
+    end
+  end
+    
+    context "DELETE /coupons/:id" do
+      let!(:coupon) { create(:coupon) }
+      let(:url) {"/admin/v1/coupons/#{coupon.id}"}
+  
+      it 'removes Coupon' do
+        expect do
+          delete url, headers: auth_header(login_user)
+        end.to change(Coupon, :count).by(-1)
+      end
+  
+      it "returns success status" do
+        delete url, headers: auth_header(login_user)
+        expect(response).to have_http_status(:no_content)
+      end
+  
+      it 'does not return any body content' do
+        delete url, headers: auth_header(login_user)
+        expect(body_json).to_not be_present
+      end
+  end
 end
