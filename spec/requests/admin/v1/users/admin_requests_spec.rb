@@ -5,9 +5,9 @@ RSpec.describe "Admin V1 Users as :admin", type: :request do
 
   context "GET /users" do
     let(:url) { "/admin/v1/users" }
+    let!(:users) { create_list(:user, 10) }
     
     context "without any params" do
-      let!(:users) { create_list(:user, 10) }
       it "returns 10 users" do
         get url, headers: auth_header(login_user)
         expect(body_json['users'].count).to eq 10
@@ -20,15 +20,15 @@ RSpec.describe "Admin V1 Users as :admin", type: :request do
         )
         expect(body_json['users']).to contain_exactly *expected_users
       end
-      
+
       it "returns success status" do
         get url, headers: auth_header(login_user)
         expect(response).to have_http_status(:ok)
       end
-      
-      # it_behaves_like 'pagination meta attributes', { page: 1, length: 10, total: 10, total_pages: 1 } do
-      # before { get url, headers: auth_header(login_user) }
-      # end
+
+      it_behaves_like 'pagination meta attributes', { page: 1, length: 10, total: 10, total_pages: 1 } do
+        before { get url, headers: auth_header(login_user) }
+      end
     end
 
     context "with search[name] param" do
@@ -37,13 +37,13 @@ RSpec.describe "Admin V1 Users as :admin", type: :request do
         15.times { |n| users << create(:user, name: "Search #{n + 1}") }
         users 
       end
-      
+
       let(:search_params) { { search: { name: "Search" } } }
-      
+
       it "returns only searched users limited by default pagination" do
         get url, headers: auth_header(login_user), params: search_params
         expected_users = search_name_users[0..9].map do |user|
-          user.as_json(only: %i[id name email profile])
+          user.as_json(only: %i(id name email profile))
         end
         expect(body_json['users']).to contain_exactly *expected_users
       end
@@ -53,17 +53,16 @@ RSpec.describe "Admin V1 Users as :admin", type: :request do
         expect(response).to have_http_status(:ok)
       end
 
-      # it_behaves_like 'pagination meta attributes', { page: 1, length: 10, total: 15, total_pages: 2 } do
-        # before { get url, headers: auth_header(login_user), params: search_params }
-      # end
+      it_behaves_like 'pagination meta attributes', { page: 1, length: 10, total: 15, total_pages: 2 } do
+        before { get url, headers: auth_header(login_user), params: search_params }
+      end
     end
 
     context "with pagination params" do
       let(:page) { 2 }
       let(:length) { 5 }
-      let!(:users) { create_list(:user, 10) }
 
-      let(:pagination_params) { { pagination: {page: page, length: length} } }
+      let(:pagination_params) { { page: page, length: length } }
 
       it "returns records sized by :length" do
         get url, headers: auth_header(login_user), params: pagination_params
@@ -83,32 +82,32 @@ RSpec.describe "Admin V1 Users as :admin", type: :request do
         expect(response).to have_http_status(:ok)
       end
 
-      # it_behaves_like 'pagination meta attributes', { page: 2, length: 5, total: 10, total_pages: 2 } do
-        # before { get url, headers: auth_header(login_user), params: pagination_params }
-      # end
+      it_behaves_like 'pagination meta attributes', { page: 2, length: 5, total: 10, total_pages: 2 } do
+        before { get url, headers: auth_header(login_user), params: pagination_params }
+      end
     end
 
-    # context "with order params" do
-    #   let(:order_params) { { order: { name: 'desc' } } }
+    context "with order params" do
+      let(:order_params) { { order: { name: 'desc' } } }
 
-    #   it "returns ordered users limited by default pagination" do
-    #     get url, headers: auth_header(login_user), params: order_params
-    #     users.sort! { |a, b| b[:name] <=> a[:name]}
-    #     expected_users = users[0..9].as_json(
-    #       only: %i(id name email profile)
-    #     )
-    #     expect(body_json['users']).to contain_exactly *expected_users
-    #   end
+      it "returns ordered users limited by default pagination" do
+        get url, headers: auth_header(login_user), params: order_params
+        users.sort! { |a, b| b[:name] <=> a[:name]}
+        expected_users = users[0..9].as_json(
+          only: %i(id name email profile)
+        )
+        expect(body_json['users']).to contain_exactly *expected_users
+      end
  
-    #   it "returns success status" do
-    #     get url, headers: auth_header(login_user), params: order_params
-    #     expect(response).to have_http_status(:ok)
-    #   end
+      it "returns success status" do
+        get url, headers: auth_header(login_user), params: order_params
+        expect(response).to have_http_status(:ok)
+      end
 
-    #   # it_behaves_like 'pagination meta attributes', { page: 1, length: 10, total: 10, total_pages: 1 } do
-    #     # before { get url, headers: auth_header(login_user), params: order_params }
-    #   # end
-    # end
+      it_behaves_like 'pagination meta attributes', { page: 1, length: 10, total: 10, total_pages: 1 } do
+        before { get url, headers: auth_header(login_user), params: order_params }
+      end
+    end
   end
 
   context "POST /users" do
