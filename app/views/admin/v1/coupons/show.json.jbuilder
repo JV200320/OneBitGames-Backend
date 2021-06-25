@@ -1,3 +1,3 @@
 json.coupon do
-  json.(@coupon, :code, :due_date, :discount_value, :status)
+  json.(@coupon, :id, :name, :code, :status, :discount_value, :due_date)
 end

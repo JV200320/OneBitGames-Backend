@@ -8,6 +8,6 @@ class SystemRequirement < ApplicationRecord
 
   has_many :games, dependent: :destroy
 
-  include NameSearchable
+  include LikeSearchable
   include Paginatable
 end

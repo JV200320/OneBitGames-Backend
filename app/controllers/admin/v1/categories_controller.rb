@@ -38,7 +38,7 @@ module Admin::V1
 
     def category_params
       return {} unless params.has_key?(:category)
-      params.require(:category).permit(:name)
+      params.require(:category).permit(:id, :name)
     end
 
     def save_category!

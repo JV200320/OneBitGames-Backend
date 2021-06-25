@@ -10,6 +10,6 @@ RSpec.describe SystemRequirement, type: :model do
   it { is_expected.to validate_uniqueness_of(:name).case_insensitive }
   it {is_expected.to have_many(:games).dependent(:destroy)}
 
-  it_behaves_like "name searchable concern", :system_requirement
+  it_has_behavior_of "like searchable concern", :system_requirement, :name
   it_behaves_like "paginatable concern", :system_requirement
 end
