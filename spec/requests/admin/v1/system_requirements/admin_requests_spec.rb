@@ -45,10 +45,10 @@ RSpec.describe "Admin::V1::System Requirements as :admin", type: :request do
         {system_requirement: attributes_for(:system_requirement, name: nil)}.to_json
       end
 
-      it 'does not add a new Category' do
+      it 'does not add a new System Requirement' do
         expect do
           post url, headers: auth_header(user), params: system_requirement_invalid_params
-        end.to_not change(Category, :count)
+        end.to_not change(SystemRequirement, :count)
       end
 
       it 'returns error messages' do
@@ -95,7 +95,7 @@ RSpec.describe "Admin::V1::System Requirements as :admin", type: :request do
         {system_requirement: attributes_for(:system_requirement, name: nil)}.to_json
       end
 
-      it 'does not update Category' do
+      it 'does not update System Requirement' do
         old_name = system_requirement.name
         patch url, headers: auth_header(user), params: system_requirement_invalid_params
         system_requirement.reload
